@@ -1,0 +1,26 @@
+###############################################################################
+# Simple Kafka module
+###############################################################################
+
+# Server 설정
+server:
+  port: 8082
+
+# logback 설정
+#logging:
+#  #config: file:${user.dir}/logback-spring.xml
+#  config: classpath:logback-spring.xml
+
+# kafka 설정
+spring:
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      bootstrap-servers: localhost:9092
+      group-id: -1  # default
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
