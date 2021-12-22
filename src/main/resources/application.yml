@@ -11,16 +11,62 @@ server:
 #  #config: file:${user.dir}/logback-spring.xml
 #  config: classpath:logback-spring.xml
 
-# kafka 설정
+# kafka 설정(초기)
+#spring:
+#  kafka:
+#    producer:
+#      bootstrap-servers: localhost:9092
+#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+#    consumer:
+#      bootstrap-servers: localhost:9092
+#      group-id: -1  # default
+#      auto-offset-reset: earliest
+#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
 spring:
+  # Kafka 설정
   kafka:
+    bootstrap-servers: localhost:9092
     producer:
-      bootstrap-servers: localhost:9092
+      retries: 100
+      batch-size: 20000
+      compression-type: gzip
+      buffer-memory: 33554432
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      properties:
+        # Custom setting - batch 요청을 위한 버퍼링 시간. batch-size에 다다르면 즉시 메시지를 전송한다.
+        linger.ms: 50
     consumer:
-      bootstrap-servers: localhost:9092
-      group-id: -1  # default
-      auto-offset-reset: earliest
+      group-id: -1
+      enable-auto-commit: false
+      max-poll-records: 500
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: latest
+    listener:
+      concurrency: 5
+      ack-mode: manual_immediate
+      poll-timeout: 3000
+      type: single
+    # Custom setting - retries
+    retry:
+      max-attempts: 10
+      initial-interval: 1000
+      multiplier: 2
+      max-interval: 10000
+
+
+api:
+  server:
+    topics:
+      req-at:
+      req-ft:
+      req-smt:
+      req-lmt:
+      req-mmt:
+      req-push:
+      req-email:
+        - test
