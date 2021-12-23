@@ -3,6 +3,7 @@ package com.api.service;
 import com.api.common.model.AbstractMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import javax.annotation.PostConstruct;
 
+@RequiredArgsConstructor
 @Service
 public class KafkaService {
 
@@ -22,8 +24,7 @@ public class KafkaService {
         mapper = new ObjectMapper();
     }
 
-    @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
     private ObjectMapper mapper;
 

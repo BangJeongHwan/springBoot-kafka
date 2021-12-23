@@ -30,28 +30,44 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
     producer:
-      retries: 100
+      # producer retry 갯수(네트워크가 아닌 IDC 에서는 재시도를 할 이유는 없음)
+      retries: 0
+      # [일괄 처리] 최대 크기(바이트)를 제어
       batch-size: 20000
+      # [일괄 처리] 일괄 처리량을 압축
       compression-type: gzip
+      # [큐 제한] 전송되지 않은 메시지를 수집 크기(바이트)를 제어
       buffer-memory: 33554432
+      # producer 시 데이터 전송 타입 지정
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
         # Custom setting - batch 요청을 위한 버퍼링 시간. batch-size에 다다르면 즉시 메시지를 전송한다.
         linger.ms: 50
+      # OPTION: 0, 1, all(-1) - 메시지 지속성 제어 쓰기가 성공했다는 파티션 리더의 명시적인 승인이 필요
+      acks: 1
     consumer:
+      # [오프셋 관리] 오프셋을 저장할 필요가 없는 경우가 아니면 항상 구성
       group-id: -1
-      enable-auto-commit: false
+      # [오프셋 관리] true:자동으로 커밋(default), false:자동 커밋 x
+      enable-auto-commit: true
+      # [그룹 구성] 모든 루프 반복에서 처리되는 레코드 수를 조정
       max-poll-records: 500
+      # consumer 시 데이터 전송 타입 지정
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      # [오프셋 관리] 메시지가 사용되기 전에 구성 가능한 오프셋 재설정 정책 ( latest:가장 마지막 offset부터, earliest:가장 처음 offset부터 )
       auto-offset-reset: latest
     listener:
+      # KafkaMessageListenerContainer 인스턴스 생성 갯수
       concurrency: 5
+      # [오프셋 관리] enable.auto.commit=false 일 때 ack-mode로 commit 관리 (manual_immediate : 메시지 리스너가 acknowledge() 함수가 호출하면, 즉시 오프셋 커밋)
       ack-mode: manual_immediate
       poll-timeout: 3000
       type: single
-    # Custom setting - retries
+    # Custom setting - retries 
+      # retry는 순단에 대한 retry일 뿐 큰 장애에 대한 이슈 처리라고 생각하기에는 어렵다.
+      # 그러므로 실패 및 예외 케이스에 대한 고민이 필요하다
     retry:
       max-attempts: 10
       initial-interval: 1000

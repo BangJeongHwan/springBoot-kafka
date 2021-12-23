@@ -18,15 +18,17 @@ public class EmailApiControllerTest {
     @Autowired
     private MockMvc mvc;
 
+
     @Test
     public void API로_이메일_발송요청_HttpStatus가_결과응답된다() throws Exception {
-        EmailMessageReq message = new EmailMessageReq();
-        message.setContent("test");
-        message.setFromEmail("test@naver.com");
-        message.setMemberEmail("baju92@naver.com");
-        message.setRequestDate(null);
-        message.setSendKey("1111111");
-        message.setSendType("MASS");
+        EmailMessageReq message = EmailMessageReq.builder()
+                .content("test")
+                .fromEmail("test@naver.com")
+                .memberEmail("baju92@naver.com")
+                .requestDate(null)
+                .sendKey("1111111")
+                .sendType("MASS")
+                .build();
 
         mvc.perform(
                 post("/email/sender/mail")

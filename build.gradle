@@ -23,6 +23,9 @@ dependencies {
     /*joda time*/
     implementation 'joda-time:joda-time:2.3'
 
+    /*ToStringBuilder 사용*/
+    implementation 'org.apache.commons:commons-lang3:3.11'
+
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
