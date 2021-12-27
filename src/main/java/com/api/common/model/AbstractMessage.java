@@ -1,12 +1,28 @@
 package com.api.common.model;
 
-import java.io.Serializable;
-import java.util.Map;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import lombok.Data;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.io.Serializable;
+
+@Data
+@JsonDeserialize(builder = AbstractMessage.PacketBuilder.class)
 public abstract class AbstractMessage implements Serializable {
 
     private static final long serialVersionUID = 3648418019817061388L;
 
 //    private Map<String, Object> additional;
 //    private Map<String, Object> userMap;
+
+    @JsonPOJOBuilder(withPrefix = "")
+    public static class PacketBuilder {
+    }
+
+    @Override
+    public String toString(){
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+    }
 }

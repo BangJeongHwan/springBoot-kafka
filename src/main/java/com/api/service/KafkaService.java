@@ -6,9 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.kafka.support.SendResult;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
@@ -24,30 +26,37 @@ public class KafkaService {
         mapper = new ObjectMapper();
     }
 
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, AbstractMessage> kafkaTemplate;
 
     private ObjectMapper mapper;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public void sendToKafka(String topic, AbstractMessage message) throws JsonProcessingException {
+        // props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);  설정
+        /*
         final String data;
-
         try {
             data = mapper.writeValueAsString(message);
         } catch (JsonProcessingException e) {
             throw e;
         }
+        */
 
-        ListenableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, data);
-        future.addCallback(new ListenableFutureCallback<SendResult<String, String>>() {
+        Message<AbstractMessage> msg = MessageBuilder
+                .withPayload(message)
+                .setHeader(KafkaHeaders.TOPIC, topic)
+                .build();
+
+        ListenableFuture<SendResult<String, AbstractMessage>> future = kafkaTemplate.send(msg);
+        future.addCallback(new ListenableFutureCallback<SendResult<String, AbstractMessage>>() {
             @Override
-            public void onSuccess(SendResult<String, String> result) {
+            public void onSuccess(SendResult<String, AbstractMessage> result) {
             }
 
             @Override
             public void onFailure(Throwable e) {
-                logger.error("kafka send failed. topic: {}, data: {}", topic, data, e.getCause());
+                logger.error("kafka send failed. topic: {}, data: {}", topic, message, e.getCause());
             }
         });
     }

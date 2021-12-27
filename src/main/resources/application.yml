@@ -28,7 +28,10 @@ server:
 spring:
   # Kafka 설정
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers:
+      - 10.172.16.147:9092
+      - 10.172.16.147:9093
+      - 10.172.16.147:9094
     producer:
       # producer retry 갯수(네트워크가 아닌 IDC 에서는 재시도를 할 이유는 없음)
       retries: 0
@@ -48,9 +51,9 @@ spring:
       acks: 1
     consumer:
       # [오프셋 관리] 오프셋을 저장할 필요가 없는 경우가 아니면 항상 구성
-      group-id: -1
+      group-id: send
       # [오프셋 관리] true:자동으로 커밋(default), false:자동 커밋 x
-      enable-auto-commit: true
+      enable-auto-commit: false
       # [그룹 구성] 모든 루프 반복에서 처리되는 레코드 수를 조정
       max-poll-records: 500
       # consumer 시 데이터 전송 타입 지정
@@ -85,4 +88,4 @@ api:
       req-mmt:
       req-push:
       req-email:
-        - test
+        - em-send.01
