@@ -26,6 +26,20 @@ server:
 #      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
 spring:
+  # db 설정
+  datasource:
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://10.147.1.151:3306/tason_frontal?autoReconnect=true&useSSL=false&serverTimezone=UTC
+    username: tason-frontal
+    password: amail0722
+    platform: mysql
+    hikari:
+      maximum-pool-size: 30
+      minimum-idle: 30
+      idle-timeout: 10000
+      max-lifetime: 420000
+      connection-timeout: 10000
+      validation-timeout: 10000
   # Kafka 설정
   kafka:
     bootstrap-servers:
@@ -87,5 +101,6 @@ api:
       req-lmt:
       req-mmt:
       req-push:
+        - pu-send.01
       req-email:
         - em-send.01
