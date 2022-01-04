@@ -4,7 +4,6 @@ import com.api.common.model.AbstractMessage;
 import com.api.common.util.DateUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -24,21 +23,26 @@ import java.io.Serializable;
 public class EmailMessageReq extends AbstractMessage implements Serializable {
 
     // from email address
+    @NonNull
     private String fromEmail;
 
     // request date
     private String requestDate = DateTime.now().toString(DateUtils.DATE_TIME_FORMAT);
 
     // full content (html)
+    @NonNull
     private String content;
 
     // send type (MASS, AUTO)
+    @NonNull
     private String sendType;
 
     // member email address
+    @NonNull
     private String memberEmail;
 
     // member uuid
+    @NonNull
     private String sendKey;
 
     // expire time(ms)

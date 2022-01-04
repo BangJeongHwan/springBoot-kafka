@@ -27,18 +27,20 @@ public class EmConsumer {
         mapper = new ObjectMapper();
     }
 
-    @KafkaListener(topics = "#{messageConfig.topics.reqEmail}")
+    @KafkaListener(topics = "#{messageConfig.topics.reqEmail}",
+            containerFactory = "emKafkaListenerContainerFactory"
+    )
     public void consume(
             @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
             @Payload AbstractMessage message,
             Acknowledgment acknowledgment) {
 
 
-        EmailMessageReq emailMessageReq;
+//        EmailMessageReq emailMessageReq;
 
         try {
-            emailMessageReq = mapper.convertValue(message, new TypeReference<EmailMessageReq>() {});
-            log.info("emailMessageReq : {}",emailMessageReq);
+//            emailMessageReq = mapper.convertValue(message, new TypeReference<EmailMessageReq>() {});
+            log.info("em message : {}",message);
         }catch (Exception e){
             log.error("{}",e);
         }finally {

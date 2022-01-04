@@ -23,24 +23,29 @@ import java.io.Serializable;
 public class PushMessageReq extends AbstractMessage implements Serializable {
 
     // app key
+    @NonNull
     private String appKey;
 
     // push chn type (APNS, GCM)
+    @NonNull
     private String pushChnType;
 
     // request date
     private String requestDate = DateTime.now().toString(DateUtils.DATE_TIME_FORMAT);
 
     // popup title
+    @NonNull
     private String title;
 
     // popup body
+    @NonNull
     private String body;
 
     // in app message
     private String inappMsg;
 
     // push type (T:Text, H:Html)
+    @NonNull
     private String pushType;
 
     // image
@@ -74,12 +79,14 @@ public class PushMessageReq extends AbstractMessage implements Serializable {
     private String colorize;
 
     // member token
+    @NonNull
     private String token;
 
     // expire time(ms)
     private String ttl;
 
     // member uuid
+    @NonNull
     private String sendKey;
 
     // campagin id( @if MASS, AUTO is not separated )

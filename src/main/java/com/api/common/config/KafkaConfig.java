@@ -1,6 +1,8 @@
 package com.api.common.config;
 
 import com.api.common.model.AbstractMessage;
+import com.api.common.model.email.EmailMessageReq;
+import com.api.common.model.push.PushMessageReq;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -73,11 +75,10 @@ public class KafkaConfig {
     }
 
 
-
-    /** listener config */
+    /** EM listener config */
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, AbstractMessage> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, AbstractMessage> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    public ConcurrentKafkaListenerContainerFactory<String, EmailMessageReq> emKafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, EmailMessageReq> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
         // 오프셋 커밋 동작 제어
         // MANUAL_IMMEDIATE : 리스너 스레드에서 ack가 수행되는 한 오프셋이 즉시 커밋
@@ -92,7 +93,7 @@ public class KafkaConfig {
 
         factory.setStatefulRetry(true);
         factory.setBatchListener(false);
-        factory.setConsumerFactory(consumerFactory());
+        factory.setConsumerFactory(emConsumerFactory());
         factory.setRetryTemplate(retryTemplate());
 
         factory.setRecoveryCallback(retryContext -> {
@@ -109,18 +110,77 @@ public class KafkaConfig {
         return factory;
     }
 
-    /** consumer config */
+    /** EM consumer config */
     @Bean
-    public ConsumerFactory<String, AbstractMessage> consumerFactory() {
+    public ConsumerFactory<String, EmailMessageReq> emConsumerFactory() {
 //        return new DefaultKafkaConsumerFactory<>(kafkaProperties.buildConsumerProperties());
-        JsonDeserializer<AbstractMessage> jsonDeserializer = new JsonDeserializer<>(AbstractMessage.class);
+        JsonDeserializer<EmailMessageReq> jsonDeserializer = new JsonDeserializer<>(EmailMessageReq.class);
         jsonDeserializer.setRemoveTypeHeaders(false);
         jsonDeserializer.addTrustedPackages("*");
         jsonDeserializer.setUseTypeMapperForKey(true);
-        return new DefaultKafkaConsumerFactory<>(consumerConfigs(jsonDeserializer), new StringDeserializer(), jsonDeserializer);
+        return new DefaultKafkaConsumerFactory<>(emConsumerConfigs(jsonDeserializer), new StringDeserializer(), jsonDeserializer);
     }
 
-    public Map<String, Object> consumerConfigs(JsonDeserializer<AbstractMessage> jsonDeserializer) {
+    public Map<String, Object> emConsumerConfigs(JsonDeserializer<EmailMessageReq> jsonDeserializer) {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, jsonDeserializer);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaProperties.getConsumer().getGroupId());
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, kafkaProperties.getConsumer().getEnableAutoCommit());
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, kafkaProperties.getConsumer().getMaxPollRecords());
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, kafkaProperties.getConsumer().getAutoOffsetReset());
+        return props;
+    }
+
+
+    /** PU listener config */
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, PushMessageReq> puKafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, PushMessageReq> factory = new ConcurrentKafkaListenerContainerFactory<>();
+
+        // 오프셋 커밋 동작 제어
+        // MANUAL_IMMEDIATE : 리스너 스레드에서 ack가 수행되는 한 오프셋이 즉시 커밋
+        factory.getContainerProperties().setAckMode(kafkaProperties.getListener().getAckMode());
+        // 컨슘 폴링 타임 제어
+        factory.getContainerProperties().setPollTimeout(kafkaProperties.getListener().getPollTimeout().toMillis());
+
+        // Container 동시 처리 갯수
+        factory.setConcurrency(kafkaProperties.getListener().getConcurrency());
+        // retry 예외 발생시 errorHandler 호출
+//        factory.setErrorHandler(new KafkaErrorHandler());
+
+        factory.setStatefulRetry(true);
+        factory.setBatchListener(false);
+        factory.setConsumerFactory(puConsumerFactory());
+        factory.setRetryTemplate(retryTemplate());
+
+        factory.setRecoveryCallback(retryContext -> {
+            Throwable lastThrowable = retryContext.getLastThrowable();
+            ConsumerRecord<String, String> record = (ConsumerRecord<String, String>) retryContext.getAttribute(RetryingMessageListenerAdapter.CONTEXT_RECORD);
+            Acknowledgment acknowledgment = (Acknowledgment) retryContext.getAttribute(RetryingMessageListenerAdapter.CONTEXT_ACKNOWLEDGMENT);
+
+            log.error("error received message='{}' with partition-offset='{}', key='{}'", record.value(), record.partition(), record.key(), lastThrowable);
+
+            acknowledgment.acknowledge();
+
+            return null;
+        });
+        return factory;
+    }
+
+    /** PU consumer config */
+    @Bean
+    public ConsumerFactory<String, PushMessageReq> puConsumerFactory() {
+//        return new DefaultKafkaConsumerFactory<>(kafkaProperties.buildConsumerProperties());
+        JsonDeserializer<PushMessageReq> jsonDeserializer = new JsonDeserializer<>(PushMessageReq.class);
+        jsonDeserializer.setRemoveTypeHeaders(false);
+        jsonDeserializer.addTrustedPackages("*");
+        jsonDeserializer.setUseTypeMapperForKey(true);
+        return new DefaultKafkaConsumerFactory<>(puConsumerConfigs(jsonDeserializer), new StringDeserializer(), jsonDeserializer);
+    }
+
+    public Map<String, Object> puConsumerConfigs(JsonDeserializer<PushMessageReq> jsonDeserializer) {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
