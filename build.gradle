@@ -10,6 +10,7 @@ sourceCompatibility = '1.8'
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
@@ -17,8 +18,14 @@ dependencies {
     implementation 'org.apache.kafka:kafka-clients'
     implementation 'org.springframework.kafka:spring-kafka'
 
+    /*tason-protocol*/
+    implementation 'com.humuson.tason:tason-protocol:1.0'
+
     /*주석 프로세서를 사용하여 자신의 메타데이터 생성*/
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+
+    /*Swagger*/
+    implementation 'org.springdoc:springdoc-openapi-ui:1.5.12'
 
     /*joda time*/
     implementation 'joda-time:joda-time:2.3'
