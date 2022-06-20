@@ -91,6 +91,13 @@ spring:
       multiplier: 2
       max-interval: 10000
 
+## Swagger
+springdoc:
+  swagger-ui:
+    default-models-expand-depth: -1
+  api-docs:
+    enabled: true
+    path: /api-docs
 
 api:
   server:
@@ -98,9 +105,26 @@ api:
       req-at:
       req-ft:
       req-smt:
+        - auto-send-sms.01
       req-lmt:
       req-mmt:
       req-push:
         - pu-send.01
+      req-email:
+        - em-send.01
+
+ums:
+  server:
+    topics:
+      req-at:
+        - auto-send-at.01
+      req-ft:
+        - auto-send-ft.01
+      req-smt:
+        - auto-send-sms.01
+      req-lmt:
+      req-mmt:
+      req-push:
+        - auto-send-push.01
       req-email:
         - em-send.01
