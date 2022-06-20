@@ -10,7 +10,7 @@
 
 	<appender name="dailyRollingFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>C:/app/log/springboot-kafka/simple-kafka_%d{yyyy-MM-dd}.log</fileNamePattern>
+			<fileNamePattern>/Users/bangjeonghwan/IdeaProjects/log/springboot-kafka/simple-kafka_%d{yyyy-MM-dd}.log</fileNamePattern>
 			<maxHistory>7</maxHistory>
 		</rollingPolicy>
 		<encoder>
