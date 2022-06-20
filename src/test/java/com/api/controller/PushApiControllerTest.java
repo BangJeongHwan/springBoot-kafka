@@ -30,7 +30,7 @@ class PushApiControllerTest {
                 .token("token")
                 .sendKey("22222")
                 .build();
-
+        // test
         mvc.perform(
                     post("/push/sender/message")
                             .param("appKey",message.getAppKey())
